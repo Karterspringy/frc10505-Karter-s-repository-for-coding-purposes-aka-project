@@ -45,7 +45,7 @@ public class elevatorSubsystem extends SubsystemBase {
         elevatorFxFollower.setControl(new Follower(elevatorFxLeader.getDeviceId() false)); 
         
     }
-
+    //refrence commands
     private Command setElevatorHight(double newHieght) {
         return runOnce(() -> {
             hieght = newHieght;
@@ -53,9 +53,15 @@ public class elevatorSubsystem extends SubsystemBase {
     }
 
     public Command setMotor(double voltage){
-        return run
-        usePID = false;
-        elevatorFxLeader.setVoltage(voltage);
+        return runEnd(() -> {
+            usePID = false;
+            elevatorFxLeader.setVoltage(voltage);
+        },
+        () -> {
+            elevatorFxLeader.setVoltage(0);
+            usePID = true;
+        });
+      
     }
 
 
