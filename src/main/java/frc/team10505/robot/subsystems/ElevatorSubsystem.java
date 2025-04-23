@@ -1,4 +1,5 @@
 package frc.team10505.robot.subsystems;
+import com.ctre.phoenix6.Utils;
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.controls.Follower;
@@ -7,21 +8,51 @@ import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.ElevatorFeedforward;
 import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.DutyCycleEncoder;
+import edu.wpi.first.wpilibj.simulation.ElevatorSim;
+import edu.wpi.first.wpilibj.smartdashboard.Mechanism2d;
+import edu.wpi.first.wpilibj.smartdashboard.MechanismLigament2d;
+import edu.wpi.first.wpilibj.smartdashboard.MechanismObject2d;
+import edu.wpi.first.wpilibj.smartdashboard.MechanismRoot2d;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import static frc.team10505.robot.Constants.ElevatorConstants.*;
 
-public class elevatorSubsystem extends SubsystemBase {
+public class ElevatorSubsystem extends SubsystemBase {
     //Variables//
+    public static final int kElevatorFollowerId = 52;
+    public static final int kElevatorLeaderId = 53;
+    public static final int kElevatorLeaderCurrentLimit = 40;
+    //PID
+    public static double KP = 0.32;
+    public static double KI = 0.0;
+    public static double KD = 0.0;
+   //Suff in voltage feed forward
+   public static double KS = 0.0;
+   public static double KG = 0.0;
+   public static double KV = 0.0;
+   public static double KA = 0.0;
+   
     private final TalonFX elevatorFxLeader = new TalonFX(kElevatorLeaderId, "Kingcan");
-    private final TalonFx elevatorFxFollower = new TalonFx(kElevatorFollowerId, "Kingcan");
-    private double elevatorEncoderValue = 0.0;
+    private final TalonFX elevatorFxFollower = new TalonFX(kElevatorFollowerId, "Kingcan");
+    //Encoders both real and simulated.
+    private DutyCycleEncoder elevatorEncoderValue = new DutyCycleEncoder(1);
     private double totalEffort;
     //controls
     private final PIDController elevatorController = new PIDController(KP, KI, KD);
     private final ElevatorFeedforward elevatorFeedforward = new ElevatorFeedforward(KG, KV, KA);
+    //Operator interface
+    private final SendableChooser<Double> elevatorHeight = new SendableChooser<>();
+    private double Height = 0.0;
+    //Sim vars
+    private final Mechanism2d elevMech = new Mechanism2d(1.5, 5.0);
+    private MechanismRoot2d elevRoot = elevMech.getRoot("elevRoot", 0.25, 0.0);
+    private MechanismObject2d elevViz = elevRoot.append("elevViz");
+    private ElevatorSim elevatorSim = new ElevatorSim(null, KD, KG, KA, Height, Height, false, Height, null);
+        
+
 
 
 
@@ -42,15 +73,15 @@ public class elevatorSubsystem extends SubsystemBase {
         motorConfig.NeutralMode = NeutralModeValue.Brake;
         elevatorFxFollower.getConfigurator().apply(motorConfig);
         elevatorFxFollower.getConfigurator().apply(limitConfigs);
-        elevatorFxFollower.setControl(new Follower(elevatorFxLeader.getDeviceId() false)); 
+        elevatorFxFollower.setControl(new Follower(elevatorFxLeader.getDeviceID(), false));
         
     }
     //refrence commands
-    private Command setElevatorHight(double newHieght) {
-        return runOnce(() -> {
-            hieght = newHieght;
-        });
-    }
+    // private Command setElevatorHight(double newHeight) {
+    //     return runOnce(() -> {
+    //         Height = newHeight;
+    //     });
+    // }
 
     public Command setMotor(double voltage){
         return runEnd(() -> {
@@ -64,6 +95,53 @@ public class elevatorSubsystem extends SubsystemBase {
       
     }
 
+    public Command setHeightRest(){
+        return runOnce(() -> {
+            Height = 0.0;
+        });
 
+    }
+
+    public Command setHeightL2(){
+        return runOnce(() -> {
+            Height = 10.0;
+        });
+
+    }
+
+    public Command setHeightL3(){
+        return runOnce(() -> {
+            Height = 20.0;
+        });
+
+    }
+
+    public Command setHeightL4(){
+        return runOnce(() -> {
+            Height = 30.0;
+        });
+
+    }
+
+    public double calculatevoltage(){
+        if(Utils.isSimulation()){
+            return elevatorFeedforward.calculate(Units.degreesToRadians(Elevatorviz.getPos()),
+            0) + elevatorController.calculate(ElevatorViz.getPos(), Height);
+        }else{
+            return elevatorFeedforward.calculate(elevatorEncoderValue.get(),0) + elevatorController.calculate(elevatorEncoderValue.get(), Height);
+        }
+        }
+
+    @Override
+    public void periodic(){
+
+        elevatorFxLeader.setVoltage(calculatevoltage());
+
+        if(Utils.isSimulation()){
+            elevatorSim.setInput()
+        }
+
+
+    }
 
 }
