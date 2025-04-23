@@ -3,6 +3,7 @@ import com.ctre.phoenix6.Utils;
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.controls.Follower;
+import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.ctre.phoenix6.sim.TalonFXSSimState;
@@ -127,6 +128,7 @@ public class ElevatorSubsystem extends SubsystemBase {
     public void periodic(){
 
         elevatorFxLeader.setVoltage(calculatevoltage());
+        
 
         if(Utils.isSimulation()){
             elevatorSim.setInput(elevatorFxLeader.getMotorVoltage().getValueAsDouble());
@@ -134,6 +136,8 @@ public class ElevatorSubsystem extends SubsystemBase {
             elevatorViz.setLength(elevatorSim.getPositionMeters());
          }
 
+         SmartDashboard.putNumber("height", Height);
+         SmartDashboard.putNumber("heightEncoder", elevatorEncoderValue.get());
 
     }
 
