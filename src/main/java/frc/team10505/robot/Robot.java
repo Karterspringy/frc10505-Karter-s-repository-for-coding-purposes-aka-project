@@ -18,6 +18,8 @@ public class Robot extends TimedRobot {
    */
   public Robot() {}
 
+  public final robotContainer robotContainer = new robotContainer();
+  
   @Override
   public void robotPeriodic() {}
 

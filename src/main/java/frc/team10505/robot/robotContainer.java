@@ -3,6 +3,8 @@ package frc.team10505.robot;
 import com.ctre.phoenix6.Utils;
 
 import edu.wpi.first.wpilibj.Joystick;
+import edu.wpi.first.wpilibj.smartdashboard.Mechanism2d;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.team10505.robot.subsystems.ElevatorSubsystem;
@@ -16,7 +18,7 @@ public class robotContainer {
     private final CommandJoystick joystick1 = new CommandJoystick(0);
     private final CommandJoystick joystick2 = new CommandJoystick(1);
 
-    private void configButtonBindings() {
+    public void configButtonBindings() {
         if (Utils.isSimulation()) {
             joystick1.button(1).onTrue(elevatorSubsystem.setElevatorHight(0));
             joystick1.button(2).onTrue(elevatorSubsystem.setElevatorHight(1));
@@ -29,20 +31,6 @@ public class robotContainer {
             xboxController2.y().onTrue(elevatorSubsystem.setElevatorHight(8.0));
         }
     }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
