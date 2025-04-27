@@ -44,7 +44,7 @@ public class ElevatorSubsystem extends SubsystemBase {
     public static final int kElevatorLeaderId = 53;
     public static final int kElevatorLeaderCurrentLimit = 40;
     // PID
-    public static double KP = 0.32;
+    public static double KP = 0.0;
     public static double KI = 0.0;
     public static double KD = 0.0;
     // Suff in voltage feed forward
@@ -55,7 +55,7 @@ public class ElevatorSubsystem extends SubsystemBase {
 
     private final TalonFX elevatorFxLeader;// = new TalonFX(kElevatorLeaderId, "Kingcan");
     private final TalonFX elevatorFxFollower;// = new TalonFX(kElevatorFollowerId, "Kingcan");
-    private final MotionMagicVoltage motionMagicVoltage = new MotionMagicVoltage(0.0);
+    private final MotionMagicVoltage motionMagicVoltage = new MotionMagicVoltage(2.0);
     // Encoders both real and simulated.
     private DutyCycleEncoder elevatorEncoderValue = new DutyCycleEncoder(1);
     private double totalEffort;
@@ -65,7 +65,7 @@ public class ElevatorSubsystem extends SubsystemBase {
     private final ElevatorFeedforward elevatorFeedforward = new ElevatorFeedforward(KG, KV, KA);
     // Operator interface
     private final SendableChooser<Double> elevatorHeight = new SendableChooser<>();
-    private double Height = 0.0;
+    private double Height = 6.0;
     // Sim vars
     public final Mechanism2d elevMech = new Mechanism2d(6.0, 12.0);
     private final MechanismRoot2d elevRoot = elevMech.getRoot("elevRoot", 3.0, 0.0);
@@ -99,10 +99,10 @@ public class ElevatorSubsystem extends SubsystemBase {
         slot0.kS = 0.0; // Add 0.25 V output to overcome static friction
         slot0.kV = 0.12; // A velocity target of 1 rps results in 0.12 V output
         slot0.kA = 0.01; // An acceleration of 1 rps/s requires 0.01 V output
-        slot0.kG = 0.5297854;// .528
-        slot0.kP = 30;//15// A position error of 0.2 rotations results in 12 V output
+        slot0.kG = 0.26;// .528
+        slot0.kP = 0.0;//15// A position error of 0.2 rotations results in 12 V output
         slot0.kI = 0; // No output for integrated error
-        slot0.kD = 1;//1.9// A velocity error of 1 rps results in 0.5 V output
+        slot0.kD = 0.0;//1.9// A velocity error of 1 rps results in 0.5 V output
 
         StatusCode status = StatusCode.StatusCodeNotInitialized;
         for (int i = 0; i < 5; ++i) {
@@ -151,7 +151,7 @@ public class ElevatorSubsystem extends SubsystemBase {
     public void periodic() {
         if (Utils.isSimulation()) {
             simEncoder = elevatorViz.getLength();
-            var change = (Height/2) - (simEncoder);
+            var change = (Height) - (simEncoder);
             elevatorFxLeader.setControl(motionMagicVoltage.withPosition(change).withSlot(0));
             elevatorSim.setInput(elevatorFxLeader.getMotorVoltage().getValueAsDouble());
             elevatorSim.update(0.01);
@@ -163,7 +163,7 @@ public class ElevatorSubsystem extends SubsystemBase {
             SmartDashboard.putNumber("Elevator set voltage", elevatorFxLeader.getMotorVoltage().getValueAsDouble());
             SmartDashboard.putNumber("Elevator follower set voltage",
                     elevatorFxFollower.getMotorVoltage().getValueAsDouble());
-            SmartDashboard.putNumber("Elevator Height", Height / 6);
+            SmartDashboard.putNumber("Elevator Height", Height);
             SmartDashboard.putNumber("sim elev position", elevatorSim.getPositionMeters());
             SmartDashboard.putNumber("sim elev motor position", elevatorFxLeader.getPosition().getValueAsDouble());
         }else{
