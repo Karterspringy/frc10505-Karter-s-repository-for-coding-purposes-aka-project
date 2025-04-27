@@ -19,13 +19,12 @@ public class Robot extends TimedRobot {
    * initialization code.
    */
   public Robot() {}
-  
   public final robotContainer robotContainer = new robotContainer();
-  
   @Override
   public void robotPeriodic() {
     CommandScheduler.getInstance().run();
   }
+
 
   @Override
   public void autonomousInit() {}

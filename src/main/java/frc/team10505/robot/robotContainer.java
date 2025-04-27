@@ -11,7 +11,7 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.team10505.robot.subsystems.ElevatorSubsystem;
 
 public class robotContainer {
-    private final ElevatorSubsystem elevatorSubsystem = new ElevatorSubsystem();
+    private final ElevatorSubsystem elevatorSubsystem; //= new ElevatorSubsystem();
 
     //operater interface
     private final CommandXboxController xboxController1; //=// new CommandXboxController(0);
@@ -26,13 +26,15 @@ public robotContainer() {
         xboxController2 = new CommandXboxController(1);
         joystick1 = new CommandJoystick(0);
         joystick2 = new CommandJoystick(1);
+        elevatorSubsystem = new ElevatorSubsystem();
     }else{
         xboxController1 = new CommandXboxController(0);
         xboxController2 = new CommandXboxController(1);
         joystick1 = new CommandJoystick(0);
         joystick2 = new CommandJoystick(1);
+        elevatorSubsystem = new ElevatorSubsystem();
     }
-   
+   configButtonBindings();
 }
     
 

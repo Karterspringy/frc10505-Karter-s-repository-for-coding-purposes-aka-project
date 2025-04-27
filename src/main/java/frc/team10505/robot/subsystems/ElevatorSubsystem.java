@@ -80,6 +80,7 @@ public class ElevatorSubsystem extends SubsystemBase {
         if (Utils.isSimulation()) {
             elevatorFxLeader = new TalonFX(kElevatorLeaderId);
             elevatorFxFollower = new TalonFX(kElevatorFollowerId);
+            simEncoder = Height;
         } else {
             elevatorFxLeader = new TalonFX(kElevatorLeaderId, "kingCan");
             elevatorFxFollower = new TalonFX(kElevatorFollowerId, "Kingcan");
@@ -93,7 +94,7 @@ public class ElevatorSubsystem extends SubsystemBase {
         MotionMagicConfigs motionMagic = cfg.MotionMagic;
         motionMagic.withMotionMagicCruiseVelocity(RotationsPerSecond.of(10))//1000
                 .withMotionMagicAcceleration(RotationsPerSecondPerSecond.of(20))//2400
-                .withMotionMagicJerk(RotationsPerSecondPerSecond.per(Second).of(1000));//500000
+                .withMotionMagicJerk(RotationsPerSecondPerSecond.per(Second).of(10));//500000
 
         Slot0Configs slot0 = cfg.Slot0;
         slot0.kS = 0.0; // Add 0.25 V output to overcome static friction
@@ -166,6 +167,8 @@ public class ElevatorSubsystem extends SubsystemBase {
             SmartDashboard.putNumber("Elevator Height", Height / 6);
             SmartDashboard.putNumber("sim elev position", elevatorSim.getPositionMeters());
             SmartDashboard.putNumber("sim elev motor position", elevatorFxLeader.getPosition().getValueAsDouble());
+        }else{
+
         }
 
        
