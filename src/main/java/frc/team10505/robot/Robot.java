@@ -5,6 +5,8 @@
 package frc.team10505.robot;
 
 import edu.wpi.first.wpilibj.TimedRobot;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.CommandScheduler;
 
 /**
  * The methods in this class are called automatically corresponding to each mode, as described in
@@ -17,11 +19,13 @@ public class Robot extends TimedRobot {
    * initialization code.
    */
   public Robot() {}
-
+  
   public final robotContainer robotContainer = new robotContainer();
   
   @Override
-  public void robotPeriodic() {}
+  public void robotPeriodic() {
+    CommandScheduler.getInstance().run();
+  }
 
   @Override
   public void autonomousInit() {}
