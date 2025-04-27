@@ -80,7 +80,6 @@ public class ElevatorSubsystem extends SubsystemBase {
         if (Utils.isSimulation()) {
             elevatorFxLeader = new TalonFX(kElevatorLeaderId);
             elevatorFxFollower = new TalonFX(kElevatorFollowerId);
-            simEncoder = Height;
         } else {
             elevatorFxLeader = new TalonFX(kElevatorLeaderId, "kingCan");
             elevatorFxFollower = new TalonFX(kElevatorFollowerId, "Kingcan");
