@@ -151,7 +151,7 @@ public class ElevatorSubsystem extends SubsystemBase {
     public void periodic() {
         if (Utils.isSimulation()) {
             simEncoder = elevatorViz.getLength();
-            var change = (Height/2) - (simEncoder*3);
+            var change = (Height/2) - (simEncoder);
             elevatorFxLeader.setControl(motionMagicVoltage.withPosition(change).withSlot(0));
             elevatorSim.setInput(elevatorFxLeader.getMotorVoltage().getValueAsDouble());
             elevatorSim.update(0.01);

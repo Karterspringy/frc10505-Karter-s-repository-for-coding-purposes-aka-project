@@ -41,9 +41,9 @@ public robotContainer() {
     public void configButtonBindings() {
         if (Utils.isSimulation()) {
             joystick1.button(1).onTrue(elevatorSubsystem.setElevatorHight(0));
-            joystick1.button(2).onTrue(elevatorSubsystem.setElevatorHight(1));
-            joystick1.button(3).onTrue(elevatorSubsystem.setElevatorHight(2));
-            joystick1.button(4).onTrue(elevatorSubsystem.setElevatorHight(3));
+            joystick1.button(2).onTrue(elevatorSubsystem.setElevatorHight(2));
+            joystick1.button(3).onTrue(elevatorSubsystem.setElevatorHight(4));
+            joystick1.button(4).onTrue(elevatorSubsystem.setElevatorHight(6));
         }else{
             xboxController2.a().onTrue(elevatorSubsystem.setElevatorHight(8.0));
             xboxController2.b().onTrue(elevatorSubsystem.setElevatorHight(8.0));
