@@ -44,14 +44,14 @@ public class ElevatorSubsystem extends SubsystemBase {
     public static final int kElevatorLeaderId = 53;
     public static final int kElevatorLeaderCurrentLimit = 40;
     // PID
-    public static double KP = 0.0;
-    public static double KI = 0.0;
-    public static double KD = 0.0;
+    public static double KP; //= 0.0;
+    public static double KI; //= 0.0;
+    public static double KD; //= 0.0;
     // Suff in voltage feed forward
-    public static double KS = 0.0;
-    public static double KG = 0.0;
-    public static double KV = 0.0;
-    public static double KA = 0.0;
+    public static double KS; //= 0.0;
+    public static double KG; //= 0.0;
+    public static double KV; //= 0.0;
+    public static double KA; //= 0.0;
 
     private final TalonFX elevatorFxLeader;// = new TalonFX(kElevatorLeaderId, "Kingcan");
     private final TalonFX elevatorFxFollower;// = new TalonFX(kElevatorFollowerId, "Kingcan");
@@ -65,14 +65,14 @@ public class ElevatorSubsystem extends SubsystemBase {
     private final ElevatorFeedforward elevatorFeedforward = new ElevatorFeedforward(KG, KV, KA);
     // Operator interface
     private final SendableChooser<Double> elevatorHeight = new SendableChooser<>();
-    private double Height = 6.0;
+    private double height = 2.0;
     // Sim vars
     public final Mechanism2d elevMech = new Mechanism2d(6.0, 12.0);
     private final MechanismRoot2d elevRoot = elevMech.getRoot("elevRoot", 3.0, 0.0);
     public final MechanismLigament2d elevatorViz = elevRoot.
-    append(new MechanismLigament2d("ElevatorLigament", 0, 90, 70.0, new Color8Bit(Color.kBlanchedAlmond)));
+    append(new MechanismLigament2d("ElevatorLigament", 10.0, 90, 70.0, new Color8Bit(Color.kBlanchedAlmond)));
     private final ElevatorSim elevatorSim = new ElevatorSim(DCMotor.getKrakenX60(2), 12, 10, Units.inchesToMeters(1.5), 0, 30,
-            true, Height);
+            true, height);
 
     public boolean usePID = true;
 
@@ -91,16 +91,16 @@ public class ElevatorSubsystem extends SubsystemBase {
         fdb.SensorToMechanismRatio = 12;// TODO check gearstack irl
 
         MotionMagicConfigs motionMagic = cfg.MotionMagic;
-        motionMagic.withMotionMagicCruiseVelocity(RotationsPerSecond.of(10))//1000
-                .withMotionMagicAcceleration(RotationsPerSecondPerSecond.of(20))//2400
+        motionMagic.withMotionMagicCruiseVelocity(RotationsPerSecond.of(20))//1000
+                .withMotionMagicAcceleration(RotationsPerSecondPerSecond.of(100))//2400
                 .withMotionMagicJerk(RotationsPerSecondPerSecond.per(Second).of(10));//500000
 
         Slot0Configs slot0 = cfg.Slot0;
         slot0.kS = 0.0; // Add 0.25 V output to overcome static friction
         slot0.kV = 0.12; // A velocity target of 1 rps results in 0.12 V output
         slot0.kA = 0.01; // An acceleration of 1 rps/s requires 0.01 V output
-        slot0.kG = 0.26;// .528
-        slot0.kP = 0.0;//15// A position error of 0.2 rotations results in 12 V output
+        slot0.kG = 0.3;// .528
+        slot0.kP = 1.0;//15// A position error of 0.2 rotations results in 12 V output
         slot0.kI = 0; // No output for integrated error
         slot0.kD = 0.0;//1.9// A velocity error of 1 rps results in 0.5 V output
 
@@ -121,7 +121,7 @@ public class ElevatorSubsystem extends SubsystemBase {
     // refrence commands
     public Command setElevatorHight(double newHeight) {
             return runOnce(() -> {
-                Height = newHeight;
+                height = newHeight;
             });
         }
     
@@ -140,10 +140,10 @@ public class ElevatorSubsystem extends SubsystemBase {
 
     public double calculatevoltage() {
         if (Utils.isSimulation()) {
-            return elevatorFeedforward.calculate(0) + elevatorController.calculate(Height);
+            return elevatorFeedforward.calculate(0) + elevatorController.calculate(height);
         } else {
             return elevatorFeedforward.calculate(elevatorEncoderValue.get(), 0)
-                    + elevatorController.calculate(elevatorEncoderValue.get(), Height);
+                    + elevatorController.calculate(elevatorEncoderValue.get(), height);
         }
     }
 
@@ -151,19 +151,18 @@ public class ElevatorSubsystem extends SubsystemBase {
     public void periodic() {
         if (Utils.isSimulation()) {
             simEncoder = elevatorViz.getLength();
-            var change = (Height) - (simEncoder);
+            var change = (height) - (simEncoder);
             elevatorFxLeader.setControl(motionMagicVoltage.withPosition(change).withSlot(0));
             elevatorSim.setInput(elevatorFxLeader.getMotorVoltage().getValueAsDouble());
             elevatorSim.update(0.01);
             elevatorViz.setLength(elevatorSim.getPositionMeters());
-            SmartDashboard.putNumber("height", Height);
+            SmartDashboard.putNumber("height", height);
             SmartDashboard.putNumber("heightEncoder", elevatorEncoderValue.get());
-            SmartDashboard.putData("elevatorSim", elevMech);
             SmartDashboard.putNumber("Elevator Encoder", simEncoder);
             SmartDashboard.putNumber("Elevator set voltage", elevatorFxLeader.getMotorVoltage().getValueAsDouble());
             SmartDashboard.putNumber("Elevator follower set voltage",
                     elevatorFxFollower.getMotorVoltage().getValueAsDouble());
-            SmartDashboard.putNumber("Elevator Height", Height);
+            SmartDashboard.putNumber("Elevator Height", height);
             SmartDashboard.putNumber("sim elev position", elevatorSim.getPositionMeters());
             SmartDashboard.putNumber("sim elev motor position", elevatorFxLeader.getPosition().getValueAsDouble());
         }else{
