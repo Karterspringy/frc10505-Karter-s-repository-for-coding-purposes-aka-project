@@ -1,6 +1,14 @@
 package frc.team10505.robot.subsystems;
 
+import static edu.wpi.first.units.Units.RotationsPerSecond;
+import static edu.wpi.first.units.Units.RotationsPerSecondPerSecond;
+import static edu.wpi.first.units.Units.Second;
+
+import com.ctre.phoenix6.StatusCode;
 import com.ctre.phoenix6.Utils;
+import com.ctre.phoenix6.configs.FeedbackConfigs;
+import com.ctre.phoenix6.configs.MotionMagicConfigs;
+import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.revrobotics.spark.SparkMax;
@@ -17,8 +25,10 @@ import edu.wpi.first.wpilibj.smartdashboard.Mechanism2d;
 import edu.wpi.first.wpilibj.smartdashboard.MechanismLigament2d;
 import edu.wpi.first.wpilibj.smartdashboard.MechanismRoot2d;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj.util.Color8Bit;
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class AlgaeSubsystem extends SubsystemBase{
@@ -67,5 +77,21 @@ public class AlgaeSubsystem extends SubsystemBase{
             algaePivot = new SparkMax(kAlgaePivotMotorId, MotorType.kBrushless);
             algaeIntake = new SparkMax(kAlgaeIntakeMotorId, MotorType.kBrushless);
         }
-     
-} }
+    
+        SmartDashboard.putData("Pivot Thingy", pivMech);
+} 
+
+public Command setAngle(double newAngle) {
+    return runOnce(() -> {
+        Angle =newAngle;
+    });
+}
+
+
+
+
+
+
+
+
+}
