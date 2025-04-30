@@ -9,6 +9,7 @@ import com.ctre.phoenix6.Utils;
 import com.ctre.phoenix6.configs.FeedbackConfigs;
 import com.ctre.phoenix6.configs.MotionMagicConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
+import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.revrobotics.spark.SparkMax;
@@ -21,6 +22,7 @@ import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DutyCycleEncoder;
 import edu.wpi.first.wpilibj.simulation.ElevatorSim;
+import edu.wpi.first.wpilibj.simulation.SingleJointedArmSim;
 import edu.wpi.first.wpilibj.smartdashboard.Mechanism2d;
 import edu.wpi.first.wpilibj.smartdashboard.MechanismLigament2d;
 import edu.wpi.first.wpilibj.smartdashboard.MechanismRoot2d;
@@ -31,40 +33,41 @@ import edu.wpi.first.wpilibj.util.Color8Bit;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
-public class AlgaeSubsystem extends SubsystemBase{
-    //varis
+public class AlgaeSubsystem extends SubsystemBase {
+    // varis
     public static final int kAlgaePivotMotorId = 41;
     public static final int kAlgaeIntakeMotorId = 42;
-    public static final int kAlgaeMotorLimit = 110;
+    public static final int kAlgaeMotorLimit = 180;
     public static final int kAlgaeIntakeLimit = 100000;
     // PID
-    public static double KP; //= 0.0;
-    public static double KI; //= 0.0;
-    public static double KD; //= 0.0;
+    public static double KP  = 0.0;
+    public static double KI = 0.0;
+    public static double KD = 0.0;
     // Suff in voltage feed forward
-    public static double KS; //= 0.0;
-    public static double KG; //= 0.0;
-    public static double KV; //= 0.0;
-    public static double KA; //= 0.0;
-    //Motors
+    public static double KS = 0.0;
+    public static double KG = 60.0;
+    public static double KV = 0.0;
+    public static double KA = 0.0;
+    // Motors
     private final SparkMax algaePivot;
     private final SparkMax algaeIntake;
     private final MotionMagicVoltage motionMagicVoltage = new MotionMagicVoltage(0.0);
-    //Encoders real and sim
+    // Encoders real and sim
     private DutyCycleEncoder pivotEncoderValue = new DutyCycleEncoder(2);
     private double simEncoder;
-    //controls
+    // controls
     private final PIDController pivotController = new PIDController(KP, KI, KD);
     private final ElevatorFeedforward pivotFeedforward = new ElevatorFeedforward(KG, KV, KA);
-     // Operator interface
+    // Operator interface
     private final SendableChooser<Double> pivotAngle = new SendableChooser<>();
     private double Angle = 0.0;
     // Sim vars
     public final Mechanism2d pivMech = new Mechanism2d(6.0, 12.0);
-    private final MechanismRoot2d pivRoot = pivMech.getRoot("elevRoot", 3.0, 0.0);
-    public final MechanismLigament2d pivViz = pivRoot.
-    append(new MechanismLigament2d("ElevatorLigament", 5.0, 0, 10.0, new Color8Bit(Color.kRed)));
-    private final ElevatorSim elevatorSim = new ElevatorSim(DCMotor.getKrakenX60(2), 12, 10, Units.inchesToMeters(1.5), 0, 30,
+    private final MechanismRoot2d pivRoot = pivMech.getRoot("pivotRoot", 2.2, 6.0);
+    public final MechanismLigament2d pivViz = pivRoot
+            .append(new MechanismLigament2d("PivotLigament", 5.0, 0, 10.0, new Color8Bit(Color.kRed)));
+    private final SingleJointedArmSim pivotSim = new SingleJointedArmSim(DCMotor.getKrakenX60(2), 80, SingleJointedArmSim.estimateMOI(5.0, 3.0), Units.inchesToMeters(1.5),
+            -90, 90,
             true, Angle);
 
     public boolean usePID = true;
@@ -77,21 +80,56 @@ public class AlgaeSubsystem extends SubsystemBase{
             algaePivot = new SparkMax(kAlgaePivotMotorId, MotorType.kBrushless);
             algaeIntake = new SparkMax(kAlgaeIntakeMotorId, MotorType.kBrushless);
         }
-    
-        SmartDashboard.putData("Pivot Thingy", pivMech);
+
+        SmartDashboard.putData("Algae pivot Viz", pivMech);
+
+     
+    }
+
+    public Command setAngle(double newAngle) {
+        return runOnce(() -> {
+            Angle = newAngle;
+        });
+    }
+
+    public Command setMotor(double voltage) {
+        return runEnd(() -> {
+            usePID = false;
+            algaePivot.setVoltage(voltage);
+        },
+                () -> {
+                   algaeIntake.setVoltage(0);
+                    usePID = true;
+                });
+
+    }
+
+    public double calculatevoltage() {
+        if (Utils.isSimulation()) {
+            return pivotFeedforward.calculate(0) + pivotController.calculate(pivViz.getAngle(), Angle);
+        } else {
+            return pivotFeedforward.calculate(0)
+                    + pivotController.calculate(pivotEncoderValue.get(), Angle);
+        }
+    }
+
+    @Override
+    public void periodic() {
+        if (Utils.isSimulation()) {
+            simEncoder = pivViz.getLength();
+            pivotSim.setInput(calculatevoltage());
+            pivotSim.update(0.01);
+            pivViz.setAngle(Units.radiansToDegrees(pivotSim.getAngleRads()));
+            SmartDashboard.putNumber("angle", Angle);
+            SmartDashboard.putNumber("pivotEncoder", pivotEncoderValue.get());
+            SmartDashboard.putNumber("pivot Encoder", simEncoder);
+            SmartDashboard.putNumber("pivot angle", Angle);
+            SmartDashboard.putNumber("sim pivot angle", pivotSim.getAngleRads());
+        } else {
+
+        }
+
+
 } 
-
-public Command setAngle(double newAngle) {
-    return runOnce(() -> {
-        Angle =newAngle;
-    });
-}
-
-
-
-
-
-
-
 
 }
