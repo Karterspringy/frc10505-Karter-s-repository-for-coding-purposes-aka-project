@@ -16,6 +16,7 @@ import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.config.SparkMaxConfig;
 
+import edu.wpi.first.math.controller.ArmFeedforward;
 import edu.wpi.first.math.controller.ElevatorFeedforward;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.system.plant.DCMotor;
@@ -39,35 +40,35 @@ public class AlgaeSubsystem extends SubsystemBase {
     public static final int kAlgaeIntakeMotorId = 42;
     public static final int kAlgaeMotorLimit = 180;
     public static final int kAlgaeIntakeLimit = 100000;
+    public static final double  π = 3.1415926535897932384626433832795028841971693993751058209749445923078164062862089986280348253421170679821480865132823066470938446095505822317253594081284811174502841027019385211055596446229489549303819644288109756659334461284756482337867831652712019091456485669234603486104543266482;
     // PID
     public static double KP  = 0.0;
     public static double KI = 0.0;
     public static double KD = 0.0;
     // Suff in voltage feed forward
     public static double KS = 0.0;
-    public static double KG = 60.0;
-    public static double KV = 0.0;
-    public static double KA = 0.0;
+    public static double KG = 5.0;
+    public static double KV = 0.2;
+    public static double KA = 0.2;
     // Motors
     private final SparkMax algaePivot;
     private final SparkMax algaeIntake;
-    private final MotionMagicVoltage motionMagicVoltage = new MotionMagicVoltage(0.0);
     // Encoders real and sim
     private DutyCycleEncoder pivotEncoderValue = new DutyCycleEncoder(2);
     private double simEncoder;
     // controls
     private final PIDController pivotController = new PIDController(KP, KI, KD);
-    private final ElevatorFeedforward pivotFeedforward = new ElevatorFeedforward(KG, KV, KA);
+    private final ArmFeedforward pivotFeedforward = new ArmFeedforward(KG, KV, KA);
     // Operator interface
     private final SendableChooser<Double> pivotAngle = new SendableChooser<>();
     private double Angle = 0.0;
     // Sim vars
     public final Mechanism2d pivMech = new Mechanism2d(6.0, 12.0);
-    private final MechanismRoot2d pivRoot = pivMech.getRoot("pivotRoot", 2.2, 6.0);
+    private final MechanismRoot2d pivRoot = pivMech.getRoot("pivotRoot", 2.5, 6.0);
     public final MechanismLigament2d pivViz = pivRoot
             .append(new MechanismLigament2d("PivotLigament", 5.0, 0, 10.0, new Color8Bit(Color.kRed)));
     private final SingleJointedArmSim pivotSim = new SingleJointedArmSim(DCMotor.getKrakenX60(2), 80, SingleJointedArmSim.estimateMOI(5.0, 3.0), Units.inchesToMeters(1.5),
-            -90, 90,
+            -110, 110,
             true, Angle);
 
     public boolean usePID = true;
@@ -81,7 +82,7 @@ public class AlgaeSubsystem extends SubsystemBase {
             algaeIntake = new SparkMax(kAlgaeIntakeMotorId, MotorType.kBrushless);
         }
 
-        SmartDashboard.putData("Algae pivot Viz", pivMech);
+        SmartDashboard.putData("pivot Viz", pivMech);
 
      
     }
@@ -106,9 +107,9 @@ public class AlgaeSubsystem extends SubsystemBase {
 
     public double calculatevoltage() {
         if (Utils.isSimulation()) {
-            return pivotFeedforward.calculate(0) + pivotController.calculate(pivViz.getAngle(), Angle);
+            return pivotFeedforward.calculate(Angle*π/180, 0) + pivotController.calculate(pivViz.getAngle(), Angle);
         } else {
-            return pivotFeedforward.calculate(0)
+            return pivotFeedforward.calculate(KA, Angle)
                     + pivotController.calculate(pivotEncoderValue.get(), Angle);
         }
     }
@@ -116,17 +117,16 @@ public class AlgaeSubsystem extends SubsystemBase {
     @Override
     public void periodic() {
         if (Utils.isSimulation()) {
-            simEncoder = pivViz.getLength();
+            simEncoder = pivViz.getAngle();
             pivotSim.setInput(calculatevoltage());
             pivotSim.update(0.01);
             pivViz.setAngle(Units.radiansToDegrees(pivotSim.getAngleRads()));
             SmartDashboard.putNumber("angle", Angle);
-            SmartDashboard.putNumber("pivotEncoder", pivotEncoderValue.get());
             SmartDashboard.putNumber("pivot Encoder", simEncoder);
             SmartDashboard.putNumber("pivot angle", Angle);
             SmartDashboard.putNumber("sim pivot angle", pivotSim.getAngleRads());
         } else {
-
+            SmartDashboard.putNumber("pivotEncoder", pivotEncoderValue.get());
         }
 
 

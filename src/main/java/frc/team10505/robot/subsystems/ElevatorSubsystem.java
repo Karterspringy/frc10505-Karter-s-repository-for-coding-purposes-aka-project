@@ -70,7 +70,7 @@ public class ElevatorSubsystem extends SubsystemBase {
     public final Mechanism2d elevMech = new Mechanism2d(6.0, 12.0);
     private final MechanismRoot2d elevRoot = elevMech.getRoot("elevRoot", 3.0, 0.0);
     public final MechanismLigament2d elevatorViz = elevRoot
-            .append(new MechanismLigament2d("ElevatorLigament", 10.0, 90, 70.0, new Color8Bit(Color.kBlanchedAlmond)));
+            .append(new MechanismLigament2d("ElevatorLigament", 10.0, 90, 70.0, new Color8Bit(Color.kOrange)));
     private final ElevatorSim elevatorSim = new ElevatorSim(DCMotor.getKrakenX60(2), 12, 10, Units.inchesToMeters(1.5),
             0, 30,
             true, height);
@@ -146,6 +146,7 @@ public class ElevatorSubsystem extends SubsystemBase {
                     + elevatorController.calculate(elevatorEncoderValue.get(), height);
         }
     }
+
 
     @Override
     public void periodic() {
