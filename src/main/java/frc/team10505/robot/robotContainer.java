@@ -49,9 +49,9 @@ public robotContainer() {
             joystick1.button(3).onTrue(elevatorSubsystem.setElevatorHight(2));
             joystick1.button(4).onTrue(elevatorSubsystem.setElevatorHight(3));
             //pivot
-            joystick2.button(1).onTrue(algaeSubsystem.setAngle(0));
-            joystick2.button(2).onTrue(algaeSubsystem.setAngle(-90));
-            joystick2.button(3).onTrue(algaeSubsystem.setAngle(-45));
+            joystick2.button(1).onTrue(algaeSubsystem.setAngle(-90));
+            joystick2.button(2).onTrue(algaeSubsystem.setAngle(-45));
+            joystick2.button(3).onTrue(algaeSubsystem.setAngle(0));
             joystick2.button(4).onTrue(algaeSubsystem.setAngle(90));
         }else{
             //elevator

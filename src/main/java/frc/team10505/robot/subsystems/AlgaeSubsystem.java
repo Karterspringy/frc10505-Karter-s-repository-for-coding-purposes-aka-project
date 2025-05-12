@@ -61,13 +61,13 @@ public class AlgaeSubsystem extends SubsystemBase {
     private final ArmFeedforward pivotFeedforward; //= new ArmFeedforward(0.0, 0.0, 0.0);
     // Operator interface
     private final SendableChooser<Double> pivotAngle = new SendableChooser<>();
-    private double Angle = 30;
+    private double Angle = 0.0;
     // Sim vars
     public final Mechanism2d pivMech = new Mechanism2d(6.0, 12.0);
     private final MechanismRoot2d pivRoot = pivMech.getRoot("pivotRoot", 2.5, 6.0);
     public final MechanismLigament2d pivViz = pivRoot
-            .append(new MechanismLigament2d("PivotLigament", 5.0, 30, 10.0, new Color8Bit(Color.kRed)));
-    private final SingleJointedArmSim pivotSim = new SingleJointedArmSim(DCMotor.getKrakenX60(2), 80, SingleJointedArmSim.estimateMOI(5.0, 3.0), Units.inchesToMeters(1.5),
+            .append(new MechanismLigament2d("PivotLigament", 5.0, 0.0, 10.0, new Color8Bit(Color.kRed)));
+    private final SingleJointedArmSim pivotSim = new SingleJointedArmSim(DCMotor.getKrakenX60(2), 80, SingleJointedArmSim.estimateMOI(0.2, 3.0), Units.inchesToMeters(1.5),
             -110, 110,
             true, Angle);
 
@@ -76,13 +76,13 @@ public class AlgaeSubsystem extends SubsystemBase {
     public AlgaeSubsystem() {
         if (Utils.isSimulation()) {
             algaeIntake = new SparkMax(kAlgaeIntakeMotorId, MotorType.kBrushless);
-            pivotController = new PIDController(0.0, 0.0, 0.0);
-            pivotFeedforward = new ArmFeedforward(0.0, 7.0, 0.2, 0.2);
+            pivotController = new PIDController(1.0, 0.0, 0.0);
+            pivotFeedforward = new ArmFeedforward(0.0, 0.1632552, 0.2, 0.2);
            
         } else {
             algaeIntake = new SparkMax(kAlgaeIntakeMotorId, MotorType.kBrushless);
-            pivotController = new PIDController(0.0, 0.0, 0.0);
-            pivotFeedforward = new ArmFeedforward(0.0, 0.0, 0.0, 0.0);
+            pivotController = new PIDController(1.0, 0.0, 0.0);
+            pivotFeedforward = new ArmFeedforward(0.0, 0.1632552, 0.2, 0.2);
 
         }
       
