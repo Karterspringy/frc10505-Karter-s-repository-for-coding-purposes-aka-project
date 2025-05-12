@@ -44,7 +44,7 @@ public class AlgaeSubsystem extends SubsystemBase {
     // varis
     public static final int kAlgaePivotMotorId = 41;
     public static final int kAlgaeIntakeMotorId = 42;
-    public static final int kAlgaeMotorLimit = 180;
+    public static final int kAlgaeMotorLimit = 110;
     public static final int kAlgaeIntakeLimit = 100000;
     private double pivotEncoderScale = 360;
     private double pivotOffset = 0;
@@ -53,20 +53,20 @@ public class AlgaeSubsystem extends SubsystemBase {
     private final SparkMax algaeIntake;
     private SparkMaxConfig pivotMotorConfig = new SparkMaxConfig();
     // Encoders real and sim
+    private final AbsoluteEncoder pivAbsoluteEncoder = algaePivot.getAbsoluteEncoder();
     private DutyCycleEncoder pivotEncoderValue = new DutyCycleEncoder(2);
     private double simEncoder;
-    private AbsoluteEncoder pivAbsoluteEncoder = algaePivot.getAbsoluteEncoder();
     // controls
     private final PIDController pivotController; //= new PIDController(0.0, 0.0, 0.0);
     private final ArmFeedforward pivotFeedforward; //= new ArmFeedforward(0.0, 0.0, 0.0);
     // Operator interface
     private final SendableChooser<Double> pivotAngle = new SendableChooser<>();
-    private double Angle = 0.0;
+    private double Angle = 30;
     // Sim vars
     public final Mechanism2d pivMech = new Mechanism2d(6.0, 12.0);
     private final MechanismRoot2d pivRoot = pivMech.getRoot("pivotRoot", 2.5, 6.0);
     public final MechanismLigament2d pivViz = pivRoot
-            .append(new MechanismLigament2d("PivotLigament", 5.0, 0, 10.0, new Color8Bit(Color.kRed)));
+            .append(new MechanismLigament2d("PivotLigament", 5.0, 30, 10.0, new Color8Bit(Color.kRed)));
     private final SingleJointedArmSim pivotSim = new SingleJointedArmSim(DCMotor.getKrakenX60(2), 80, SingleJointedArmSim.estimateMOI(5.0, 3.0), Units.inchesToMeters(1.5),
             -110, 110,
             true, Angle);
@@ -77,13 +77,15 @@ public class AlgaeSubsystem extends SubsystemBase {
         if (Utils.isSimulation()) {
             algaeIntake = new SparkMax(kAlgaeIntakeMotorId, MotorType.kBrushless);
             pivotController = new PIDController(0.0, 0.0, 0.0);
-            pivotFeedforward = new ArmFeedforward(0.0, 5.0, 0.2, 0.2);
+            pivotFeedforward = new ArmFeedforward(0.0, 7.0, 0.2, 0.2);
+           
         } else {
             algaeIntake = new SparkMax(kAlgaeIntakeMotorId, MotorType.kBrushless);
             pivotController = new PIDController(0.0, 0.0, 0.0);
             pivotFeedforward = new ArmFeedforward(0.0, 0.0, 0.0, 0.0);
-        }
 
+        }
+      
         pivotMotorConfig.idleMode(IdleMode.kBrake);
         pivotMotorConfig.smartCurrentLimit(kAlgaeMotorLimit, kAlgaeMotorLimit);
         pivotMotorConfig.absoluteEncoder.positionConversionFactor(pivotEncoderScale);
@@ -112,7 +114,7 @@ public class AlgaeSubsystem extends SubsystemBase {
     }
 
     public double getPivotEncoder() {
-        return (-pivotEncoderValue.get() + pivotOffset);
+        return (-pivAbsoluteEncoder.getPosition() + pivotOffset);
     }
 
     public double calculatevoltage() {
