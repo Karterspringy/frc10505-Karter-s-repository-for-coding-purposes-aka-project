@@ -24,11 +24,14 @@ import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import edu.wpi.first.math.controller.ArmFeedforward;
 import edu.wpi.first.math.controller.ElevatorFeedforward;
 import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.system.LinearSystem;
 import edu.wpi.first.math.system.plant.DCMotor;
+import edu.wpi.first.math.system.plant.LinearSystemId;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.measure.Velocity;
 import edu.wpi.first.wpilibj.DutyCycleEncoder;
 import edu.wpi.first.wpilibj.simulation.ElevatorSim;
+import edu.wpi.first.wpilibj.simulation.FlywheelSim;
 import edu.wpi.first.wpilibj.simulation.SingleJointedArmSim;
 import edu.wpi.first.wpilibj.smartdashboard.Mechanism2d;
 import edu.wpi.first.wpilibj.smartdashboard.MechanismLigament2d;
@@ -42,9 +45,9 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class AlgaeSubsystem extends SubsystemBase {
     // varis
-    public static final int kAlgaePivotMotorId = 41;
-    public static final int kAlgaeIntakeMotorId = 42;
-    public static final int kAlgaeMotorLimit = 110;
+    public static final int kAlgaePivotMotorId = 8;
+    public static final int kAlgaeIntakeMotorId = 7;
+    public static final int kAlgaeMotorLimit = 15;
     public static final int kAlgaeIntakeLimit = 100000;
     private double pivotEncoderScale = 360;
     private double pivotOffset = 0;
@@ -73,6 +76,11 @@ public class AlgaeSubsystem extends SubsystemBase {
 
     public boolean usePID = true;
 
+    public final Mechanism2d alIntMech = new Mechanism2d(6.0, 12.0);
+    private final MechanismRoot2d alIntRoot = alIntMech.getRoot("ALgae intake root", 2.5, 6.0);
+    public final MechanismLigament2d alIntViz = alIntRoot
+            .append(new MechanismLigament2d("Algae int Ligament", 5.0, 0.0, 10.0, new Color8Bit(Color.kGreen)));
+   
     public AlgaeSubsystem() {
         if (Utils.isSimulation()) {
             algaeIntake = new SparkMax(kAlgaeIntakeMotorId, MotorType.kBrushless);

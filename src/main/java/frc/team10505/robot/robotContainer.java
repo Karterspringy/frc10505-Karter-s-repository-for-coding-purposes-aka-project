@@ -1,9 +1,12 @@
 package frc.team10505.robot;
 
 import com.ctre.phoenix6.Utils;
+import com.pathplanner.lib.auto.AutoBuilder;
 
+import edu.wpi.first.util.sendable.Sendable;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.smartdashboard.Mechanism2d;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
@@ -19,7 +22,9 @@ public class robotContainer {
     private final CommandXboxController xboxController2; //= new CommandXboxController(1);
     private final CommandJoystick joystick1; //= //new CommandJoystick(0);
     private final CommandJoystick joystick2; //= new CommandJoystick(1);
-    //supersticture
+    
+    private SendableChooser<Command> autoChoose;
+
     
 public robotContainer() {
     if (Utils.isSimulation()) {
@@ -38,6 +43,9 @@ public robotContainer() {
         algaeSubsystem = new AlgaeSubsystem();
     }
    configButtonBindings();
+   autoChoose = AutoBuilder.buildAutoChooser();
+   SmartDashboard.putData("Auton",autoChoose);
+   
 }
     
 
@@ -66,6 +74,7 @@ public robotContainer() {
             xboxController1.y().onTrue(algaeSubsystem.setAngle(0));
         }
     }
+
 
 
 
