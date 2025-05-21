@@ -22,6 +22,7 @@ public class robotContainer {
     private final CommandXboxController xboxController2; //= new CommandXboxController(1);
     private final CommandJoystick joystick1; //= //new CommandJoystick(0);
     private final CommandJoystick joystick2; //= new CommandJoystick(1);
+    private final CommandJoystick joystick3;
     
     private SendableChooser<Command> autoChoose;
 
@@ -32,6 +33,7 @@ public robotContainer() {
         xboxController2 = new CommandXboxController(1);
         joystick1 = new CommandJoystick(0);
         joystick2 = new CommandJoystick(1);
+        joystick3 = new CommandJoystick(2);
         elevatorSubsystem = new ElevatorSubsystem();
         algaeSubsystem = new AlgaeSubsystem();
     }else{
@@ -39,12 +41,13 @@ public robotContainer() {
         xboxController2 = new CommandXboxController(1);
         joystick1 = new CommandJoystick(0);
         joystick2 = new CommandJoystick(1);
+        joystick3 = new CommandJoystick(2);
         elevatorSubsystem = new ElevatorSubsystem();
         algaeSubsystem = new AlgaeSubsystem();
     }
    configButtonBindings();
-   autoChoose = AutoBuilder.buildAutoChooser();
-   SmartDashboard.putData("Auton",autoChoose);
+//    autoChoose = AutoBuilder.buildAutoChooser();
+//    SmartDashboard.putData("Auton",autoChoose);
    
 }
     
@@ -61,6 +64,9 @@ public robotContainer() {
             joystick2.button(2).onTrue(algaeSubsystem.setAngle(-45));
             joystick2.button(3).onTrue(algaeSubsystem.setAngle(0));
             joystick2.button(4).onTrue(algaeSubsystem.setAngle(90));
+            //AlgInt
+            joystick3.button(1).whileTrue(algaeSubsystem.runAlgInt(0));
+            joystick3.button(1).whileTrue(algaeSubsystem.runAlgInt(15));
         }else{
             //elevator
             xboxController2.a().onTrue(elevatorSubsystem.setElevatorHight(0));
@@ -68,10 +74,10 @@ public robotContainer() {
             xboxController2.x().onTrue(elevatorSubsystem.setElevatorHight(0));
             xboxController2.y().onTrue(elevatorSubsystem.setElevatorHight(0));
             //pivot
-            xboxController1.a().onTrue(algaeSubsystem.setAngle(0));
-            xboxController1.b().onTrue(algaeSubsystem.setAngle(0));
+            xboxController1.a().onTrue(algaeSubsystem.setAngle(-90));
+            xboxController1.b().onTrue(algaeSubsystem.setAngle(-45));
             xboxController1.x().onTrue(algaeSubsystem.setAngle(0));
-            xboxController1.y().onTrue(algaeSubsystem.setAngle(0));
+            xboxController1.y().onTrue(algaeSubsystem.setAngle(90));
         }
     }
 

@@ -230,7 +230,16 @@ public class DrivetrainSubsystem extends TunerSwerveDrivetrain implements Subsys
     }
 
     public void configPathPlanner() {
-        try{}catch(Exception E){
+        try{
+            var config =RobotConfig.fromGUISettings();
+            
+            AutoBuilder.configure(() -> getState().Pose, this::resetPose, () -> getState().Speeds, (Speeds, feedForward) -> setControl(m_pathApplyRobotSpeeds.withSpeeds(Speeds).withWheelForceFeedforwardsX(feedForward.robotRelativeForcesXNewtons()).withWheelForceFeedforwardsY(feedForward.robotRelativeForcesYNewtons())),
+            new PPHolonomicDriveController(
+                new PIDConstants(0, 0, 0),
+                new PIDConstants(0, 0, 0)),
+                config, () -> DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Red, this);
+
+        }catch(Exception E){
             DriverStation.reportError("PathPlanner faild You Monkey of the great sea of blood", E.getStackTrace());
         }
     }
